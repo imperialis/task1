@@ -5,12 +5,13 @@ const axios = require('axios');
 const app = express();
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const IP_GEOLOCATION_API_KEY = process.env.IP_GEOLOCATION_API_KEY;
+app.set('trust proxy', true);
 
 
-const fetchLocationAndWeather = async () => {
+const fetchLocationAndWeather = async (ip) => {
   try {
     // Fetch user's location using IPGeolocation API
-    const locationResponse = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${IP_GEOLOCATION_API_KEY}`);
+    const locationResponse = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${IP_GEOLOCATION_API_KEY}&ip=${ip}`);
     const locationData = await locationResponse.data;
     const city = locationData.city;
     const ip_address = locationData.ip;
@@ -35,10 +36,11 @@ const fetchLocationAndWeather = async () => {
 
 app.get('/api/hello', async (req, res) => {
     const visitorName = req.query.visitor_name;
+    const clientIp =  req.ip;
 
   
     try {
-      const { city, temperature, ip_address } = await fetchLocationAndWeather();
+      const { city, temperature, ip_address } = await fetchLocationAndWeather(clientIp);
   
       const greeting = `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${city}`;
   
